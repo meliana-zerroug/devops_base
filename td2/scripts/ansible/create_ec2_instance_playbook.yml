@@ -1,0 +1,55 @@
+# Pour qu'Ansible puisse se connecter aux instances EC2, nous avons du gérer une paire de clés, comme il y a eu un problème de permission nous avons restreint les droits 
+# du fichier de la clé privée avec la commande chmod 400 ansible-ch2.key
+# nous avons du également déplacer la clé vers le système de fichiers Linux (WSL) pour qu'Ansible puisse y accéder correctement. 
+
+# Exercice 1 
+# Comme il y a le creates dans le script, le script est totalement idempotent.
+# On peut le relancer autant de fois que l'on veut, cela ne changera rien, s'il n'y avait pas le creates,
+# le script relancerait l'application nodejs à chaque fois, créant ainsi plusieurs processus nodejs ou aurait peut être échoué.
+
+#Exercice 2 
+# Pour créer plusieurs instances il faut juste ajouter le paramètre "count" dans la création de l'instance EC2.
+# Comme on utilise un inventaire dynamique, Ansible va automatiquement détecter les nouvelles instances et les ajouter à l'inventaire.
+
+# Voici ce que l'on obtient (plusieurs instances) :
+#PLAY RECAP *********************************************************************
+#ec2-3-128-204-204.us-east-2.compute.amazonaws.com : ok=5    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+#ec2-3-143-203-109.us-east-2.compute.amazonaws.com : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+#ec2-3-144-25-186.us-east-2.compute.amazonaws.com : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+- name: Deploy an EC2 instance in AWS
+  hosts: localhost
+  gather_facts: no
+  environment:
+    AWS_REGION: us-east-2
+  tasks:    
+    - name: Create security group                      
+      amazon.aws.ec2_security_group:
+        name: sample-app-ansible 
+        description: Allow HTTP and SSH traffic
+        rules:
+          - proto: tcp
+            ports: [8080]
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            ports: [22]
+            cidr_ip: 0.0.0.0/0
+      register: aws_security_group
+
+    - name: Create a new EC2 key pair                  
+      amazon.aws.ec2_key:
+        name: ansible-ch2
+        file_name: ansible-ch2.key                     
+      no_log: true
+      register: aws_ec2_key_pair
+
+    - name: Create EC2 instance with Amazon Linux 2003 
+      amazon.aws.ec2_instance:
+        name: sample-app-ansible
+        key_name: "{{ aws_ec2_key_pair.key.name }}"
+        instance_type: t3.micro
+        security_group: "{{ aws_security_group.group_id }}"
+        image_id: ami-0900fe555666598a2
+        count: 2
+        tags:
+          Ansible: ch2_instances                       
