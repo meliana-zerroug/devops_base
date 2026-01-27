@@ -1,0 +1,21 @@
+{
+  "name": "sample-app",
+  "version": "1.0.0",
+  "main": "app.js",
+"scripts": {
+  "start": "node server.js",
+  "test": "jest --verbose",
+  "dockerize": "./build-docker-image.sh"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "supertest": "^7.2.2"
+  }
+}
