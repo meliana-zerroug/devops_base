@@ -15,5 +15,7 @@
     version: latest
     global: true
 
-- name: Configure pm2 to run at startup as the app user
-  shell: eval "$(sudo su app-user bash -c 'pm2 startup' | tail -n1)"
+- name: Configure PM2 to run at startup
+  shell: |
+    env PATH=$PATH:/usr/bin pm2 startup systemd -u app-user --hp /home/app-user
+    systemctl enable pm2-app-user
