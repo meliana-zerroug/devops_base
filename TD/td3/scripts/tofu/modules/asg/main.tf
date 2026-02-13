@@ -20,6 +20,15 @@ resource "aws_security_group_rule" "sample_app_allow_http_inbound" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
+resource "aws_security_group_rule" "sample_app_allow_all_outbound" {
+  type              = "egress"
+  protocol          = "-1"
+  from_port         = 0
+  to_port           = 0
+  security_group_id = aws_security_group.sample_app.id
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
 resource "aws_autoscaling_group" "sample_app" {
 
   name_prefix         = var.name
