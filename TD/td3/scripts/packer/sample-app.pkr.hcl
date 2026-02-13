@@ -16,7 +16,7 @@ source "amazon-ebs" "amazon_linux" {
   region        = var.aws_region 
   source_ami_filter {
     filters = { 
-      name                = "amzn2-ami-hvm-*-x86_64-gp2" 
+      name                = "al2023-ami-*-x86_64" 
       root-device-type    = "ebs" 
       virtualization-type = "hvm" 
     } 
@@ -41,7 +41,7 @@ build {
       "sudo mv /tmp/app.js /tmp/app.config.js /home/app-user/", 
       "sudo chown -R app-user:app-user /home/app-user", 
       "sudo npm install pm2@latest -g", 
-      "sudo su - app-user -c 'pm2 startup systemd -u app-user --hp /home/app-user'", 
+      "sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u app-user --hp /home/app-user", 
       "sudo systemctl enable pm2-app-user", 
     ] 
   } 

@@ -50,6 +50,8 @@ resource "aws_autoscaling_group" "sample_app" {
 
   target_group_arns = var.target_group_arns
   health_check_type = length(var.target_group_arns) > 0 ? "ELB" : "EC2"
+  health_check_grace_period = 300
+  wait_for_capacity_timeout = "0"
 
   dynamic "instance_refresh" {
     for_each = var.instance_refresh == null ? [] : [1]
