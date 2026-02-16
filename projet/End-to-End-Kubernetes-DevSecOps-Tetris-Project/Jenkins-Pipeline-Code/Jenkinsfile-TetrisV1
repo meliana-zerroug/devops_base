@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Sonarqube Analysis') {
             steps {
-                dir('Tetris-V1') {
+                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Tetris \
                         -Dsonar.projectKey=Tetris '''
@@ -36,14 +36,14 @@ pipeline {
         }
         stage('Installing Dependencies') {
             steps {
-                dir('Tetris-V1') {
+                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                     sh 'npm install'
                 }
             }
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                dir('Tetris-V1') {
+                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                     dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
@@ -51,7 +51,7 @@ pipeline {
         }
         stage('Trivy File Scan') {
             steps {
-                dir('Tetris-V1') {
+                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                     sh 'trivy fs . > trivyfs.txt'
                 }
             }
@@ -59,7 +59,7 @@ pipeline {
         stage("Docker Image Build") {
             steps {
                 script {
-                    dir('Tetris-V1') {
+                    dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                         withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                             sh 'docker system prune -f'
                             sh 'docker build -t tetrisv1 .'
@@ -94,7 +94,7 @@ pipeline {
                 GIT_USER_NAME = "meliana-zerroug"
             }
             steps {
-                dir('Manifest-file') {
+                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Manifest-file') {
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                         sh '''
                             git config user.email "damien.ledey@edu.esiee.fr"
