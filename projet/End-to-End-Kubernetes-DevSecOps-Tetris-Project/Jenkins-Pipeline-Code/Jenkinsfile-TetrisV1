@@ -22,7 +22,8 @@ pipeline {
                 dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Tetris \
-                        -Dsonar.projectKey=Tetris '''
+                        -Dsonar.projectKey=Tetris \
+                        -Dsonar.javascript.node.maxspace=4096 '''
                     }
                 }
             }
