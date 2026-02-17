@@ -48,6 +48,8 @@ data "aws_iam_policy_document" "test_serverless_app" {
       "iam:DeleteRole",
       "iam:UpdateRole",
       "iam:PassRole",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy",
       "iam:List*Role*",
       "iam:Get*Role*"
     ]
@@ -182,6 +184,8 @@ data "aws_iam_policy_document" "apply_serverless_app" {
       "iam:DeleteRole",
       "iam:UpdateRole",
       "iam:PassRole",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy",
       "iam:List*Role*",
       "iam:Get*Role*"
     ]
