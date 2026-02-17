@@ -49,7 +49,9 @@ data "aws_iam_policy_document" "test_serverless_app" {
       "iam:UpdateRole",
       "iam:PassRole",
       "iam:List*Role*",
-      "iam:Get*Role*"
+      "iam:Get*Role*",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy"
     ]
     resources = ["arn:aws:iam::*:role/${var.lambda_base_name}*"]
   }
@@ -126,6 +128,13 @@ data "aws_iam_policy_document" "plan_serverless_app" {
     actions   = ["s3:Get*", "s3:List*"]
     resources = [local.state_bucket_arn, "${local.state_bucket_arn}/*"]
   }
+
+  statement {
+    sid       = "TofuStateDynamoReadOnlyPermissions"
+    effect    = "Allow"
+    actions   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
+    resources = ["arn:aws:dynamodb:*:*:table/${var.tofu_state_dynamodb_table}"]
+  }
 }
 
 locals {
@@ -183,7 +192,9 @@ data "aws_iam_policy_document" "apply_serverless_app" {
       "iam:UpdateRole",
       "iam:PassRole",
       "iam:List*Role*",
-      "iam:Get*Role*"
+      "iam:Get*Role*",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy"
     ]
     resources = ["arn:aws:iam::*:role/${var.lambda_base_name}*"]
   }
