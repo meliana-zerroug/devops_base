@@ -126,6 +126,13 @@ data "aws_iam_policy_document" "plan_serverless_app" {
     actions   = ["s3:Get*", "s3:List*"]
     resources = [local.state_bucket_arn, "${local.state_bucket_arn}/*"]
   }
+
+  statement {
+    sid       = "TofuStateDynamoReadOnlyPermissions"
+    effect    = "Allow"
+    actions   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
+    resources = ["arn:aws:dynamodb:*:*:table/${var.tofu_state_dynamodb_table}"]
+  }
 }
 
 locals {
