@@ -81,7 +81,7 @@ pipeline {
         }
         stage("TRIVY Image Scan") {
             steps {
-                sh "trivy image damien-ledey/tetrisv1:${BUILD_NUMBER} > trivyimage.txt"
+                sh "trivy image damienledey/tetrisv1:${BUILD_NUMBER} > trivyimage.txt"
             }
         }
         stage('Checkout Code') {
