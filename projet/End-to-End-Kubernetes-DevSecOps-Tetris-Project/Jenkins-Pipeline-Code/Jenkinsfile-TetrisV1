@@ -44,9 +44,21 @@ pipeline {
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
-                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
+                        withCredentials([string(credentialsId: 'nvdApiKey', variable: 'NVD_KEY')]) {
+                            
+                            dependencyCheck additionalArguments: """
+                                --scan ./ 
+                                --disableYarnAudit 
+                                --disableNodeAudit 
+                                --nvdApiKey ${NVD_KEY} 
+                                --nvdApiDelay 16000 
+                            """, odcInstallation: 'DP-Check'
+                            
+                            dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                        }
+                    }
                 }
             }
         }
@@ -95,20 +107,22 @@ pipeline {
                 GIT_USER_NAME = "meliana-zerroug"
             }
             steps {
-                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Manifest-file') {
-                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                        sh """
-                            git config user.email "damien.ledey@edu.esiee.fr"
-                            git config user.name "damien-ledey"
-                            BUILD_NUMBER=${BUILD_NUMBER}
-                            echo $BUILD_NUMBER
-                            imageTag=\$(grep -oP '(?<=tetrisv1:)[^ ]+' deployment-service.yml)
-                            echo $imageTag
-                            sed -i "s/tetrisv1:${imageTag}/tetrisv1:${BUILD_NUMBER}/" deployment-service.yml
-                            git add deployment-service.yml
-                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                        """
+                script {
+                    dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Manifest-file') {
+                        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                            def imageTag = sh(script: 'grep -oP "(?<=tetrisv1:)[^ ]+" deployment-service.yml', returnStdout: true).trim()
+                            sh'''
+                                git config user.email "meliana.zerroug@edu.esiee.fr"
+                                git config user.name "meliana-zerroug"
+                                BUILD_NUMBER=${BUILD_NUMBER}
+                                echo $BUILD_NUMBER
+                                echo $imageTag
+                                sed -i "s/tetrisv1:${imageTag}/tetrisv1:${BUILD_NUMBER}/" deployment-service.yml
+                                git add deployment-service.yml
+                                git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
+                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                            '''
+                        }
                     }
                 }
             }

@@ -6,3 +6,8 @@
 **/.terraform/
 *.exe
 tetris-key.pem
+
+node_modules
+npm-debug.log
+build
+.git
