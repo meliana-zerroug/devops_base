@@ -2,11 +2,13 @@
   "name": "sample-app",
   "version": "1.0.0",
   "main": "app.js",
-"scripts": {
-  "start": "node server.js",
-  "test": "jest --verbose",
-  "dockerize": "./build-docker-image.sh"
-},
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage --verbose",
+    "dockerize": "bash build-docker-image.sh",
+    "docker:run": "docker run -p 8080:8080 sample-app:1.0.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
