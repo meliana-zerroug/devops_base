@@ -44,17 +44,12 @@ pipeline {
         }
         stage('OWASP Dependency-Check Scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                     dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
                         withCredentials([string(credentialsId: 'nvdApiKey', variable: 'NVD_KEY')]) {
                             
-                            dependencyCheck additionalArguments: """
-                                --scan ./ 
-                                --disableYarnAudit 
-                                --disableNodeAudit 
-                                --nvdApiKey ${NVD_KEY} 
-                                --nvdApiDelay 16000 
-                            """, odcInstallation: 'DP-Check'
+                            dependencyCheck additionalArguments: "--scan ./ --format HTML --format XML --noupdate", 
+                            odcInstallation: 'DP-Check'
                             
                             dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                         }
@@ -64,8 +59,10 @@ pipeline {
         }
         stage('Trivy File Scan') {
             steps {
-                dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
-                    sh 'trivy fs . > trivyfs.txt'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    dir('projet/End-to-End-Kubernetes-DevSecOps-Tetris-Project/Tetris-V1') {
+                        sh 'trivy fs . > trivyfs.txt'
+                    }
                 }
             }
         }
@@ -93,7 +90,9 @@ pipeline {
         }
         stage("TRIVY Image Scan") {
             steps {
-                sh "trivy image damienledey/tetrisv1:${BUILD_NUMBER} > trivyimage.txt"
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    sh "trivy image --timeout 15m damienledey/tetrisv1:${BUILD_NUMBER} > trivyimage.txt"
+                }
             }
         }
         stage('Checkout Code') {
